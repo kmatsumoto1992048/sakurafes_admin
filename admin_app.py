@@ -25,8 +25,14 @@ def format_num(n: int) -> str:
 def load_today():
     if DATA_FILE.exists():
         with open(DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return None
+            data = json.load(f)
+            if isinstance(data, dict) and isinstance(data.get("history"), list):
+                return data
+            if isinstance(data, list):
+                return {"history": data}
+            if isinstance(data, dict):
+                return {"history": [data]}
+    return {"history": []}
 
 def save_today(data: dict):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -37,16 +43,20 @@ def save_today(data: dict):
 # -----------------------------
 st.header("① 当選人数の設定 と 抽選")
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
 with col1:
     n1 = st.number_input("1等の人数", min_value=0, max_value=10000, value=1, step=1)
 with col2:
     n2 = st.number_input("2等の人数", min_value=0, max_value=10000, value=3, step=1)
 with col3:
     n3 = st.number_input("3等の人数", min_value=0, max_value=10000, value=50, step=1)
+with col4:
+    draw_no = st.number_input("抽選回", min_value=1, max_value=100, value=1, step=1)
 
+saved_data = load_today()
 if "result" not in st.session_state:
-    st.session_state["result"] = load_today()
+    history = saved_data.get("history", [])
+    st.session_state["result"] = history[-1] if history else None
 
 if st.button("🎲 抽選を実行する", use_container_width=True):
     total_needed = n1 + n2
@@ -64,6 +74,8 @@ if st.button("🎲 抽選を実行する", use_container_width=True):
         third = [random.randint(0, 9999) for _ in range(n3)]
 
         result = {
+            "draw_no": int(draw_no),
+            "label": f"第{int(draw_no)}回",
             "date": str(date.today()),
             "first": first,
             "second": second,
@@ -80,7 +92,7 @@ st.header("② 当日の当選結果")
 result = st.session_state.get("result")
 
 if result:
-    st.write(f"📅 抽選日：**{result.get('date', '未設定')}**")
+    st.write(f"📅 抽選回：**{result.get('label', '未設定')}**  |  抽選日：**{result.get('date', '未設定')}**")
 
     first = result.get("first", [])
     second = result.get("second", [])
@@ -105,8 +117,22 @@ if result:
         st.write("該当なし")
 
     if st.button("💾 当日の結果を保存（today.json）", use_container_width=True):
-        save_today(result)
+        saved_history = saved_data.get("history", [])
+        saved_history = [item for item in saved_history if item.get("draw_no") != result.get("draw_no")]
+        saved_history.append(result)
+        saved_history.sort(key=lambda item: item.get("draw_no", 0))
+        save_today({"history": saved_history})
         st.success("today.json に保存しました。お客様UIから参照されます。")
+
+    if saved_data.get("history"):
+        st.markdown("---")
+        st.subheader("保存済みの抽選履歴")
+        for item in saved_data.get("history", []):
+            st.write(f"**{item.get('label', '第?回')} ({item.get('date', '未設定')})**")
+            st.write(f"1等: {', '.join(format_num(n) for n in item.get('first', [])) or '該当なし'}")
+            st.write(f"2等: {', '.join(format_num(n) for n in item.get('second', [])) or '該当なし'}")
+            st.write(f"3等: {', '.join(format_num(n) for n in item.get('third', [])) or '該当なし'}")
+            st.write("---")
 else:
     st.info("まだ抽選結果がありません。「抽選を実行する」を押してください。")
 
