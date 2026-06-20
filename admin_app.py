@@ -124,6 +124,18 @@ if result:
         save_today({"history": saved_history})
         st.success("today.json に保存しました。お客様UIから参照されます。")
 
+    # リセット / 履歴削除ボタン
+    rcol1, rcol2 = st.columns(2)
+    with rcol1:
+        if st.button("🔄 結果をリセット（セッションのみ）"):
+            st.session_state.pop("result", None)
+            st.success("セッションの抽選結果をリセットしました。ページをリロードしてください。")
+    with rcol2:
+        if st.button("🗑️ 保存済み履歴を全て削除（注意）"):
+            save_today({"history": []})
+            st.session_state.pop("result", None)
+            st.success("保存済みの抽選履歴をすべて削除しました。")
+
     if saved_data.get("history"):
         st.markdown("---")
         st.subheader("保存済みの抽選履歴")
