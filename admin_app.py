@@ -22,6 +22,18 @@ def format_num(n: int) -> str:
     """4桁ゼロ埋め表示"""
     return f"{n:04d}"
 
+def format_num_list(numbers: list[int]) -> str:
+    return ", ".join(format_num(n) for n in numbers)
+
+def display_numbers(numbers: list[int]) -> None:
+    if numbers:
+        st.markdown(
+            f"<p style='font-size:24px; line-height:1.4; margin:0;'>{format_num_list(numbers)}</p>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.write("該当なし")
+
 def load_today():
     if DATA_FILE.exists():
         with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -99,22 +111,13 @@ if result:
     third = result.get("third", [])
 
     st.subheader(f"1等（{len(first)}名）")
-    if first:
-        st.write(", ".join(format_num(n) for n in first))
-    else:
-        st.write("該当なし")
+    display_numbers(first)
 
     st.subheader(f"2等（{len(second)}名）")
-    if second:
-        st.write(", ".join(format_num(n) for n in second))
-    else:
-        st.write("該当なし")
+    display_numbers(second)
 
     st.subheader(f"3等（{len(third)}名）")
-    if third:
-        st.write(", ".join(format_num(n) for n in third))
-    else:
-        st.write("該当なし")
+    display_numbers(third)
 
     if st.button("💾 当日の結果を保存（today.json）", use_container_width=True):
         saved_history = saved_data.get("history", [])
