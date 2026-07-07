@@ -2,8 +2,13 @@
 __pycache__/
 *.pyc
 
-# Streamlit cache
-.streamlit/
+# Streamlit cache（config.tomlはテーマ設定として管理する）
+.streamlit/*
+!.streamlit/config.toml
+
+# QRコード画像・ショートカット作成スクリプト（ローカル専用）
+qrcodes/
+create_shortcut.py
 
 # Virtual environment
 venv/

@@ -3,10 +3,10 @@ from pathlib import Path
 
 BASE_URL = "https://kmatsumoto1992048-sakurafes-admin-customer-app-be57dd.streamlit.app/?ticket="
 
-A_START = 1
-A_END = 10
-B_START = 1
-B_END = 10
+A_START = 11
+A_END = 20
+B_START = 11
+B_END = 20
 
 output_dir = Path("qrcodes")
 output_dir.mkdir(exist_ok=True)
