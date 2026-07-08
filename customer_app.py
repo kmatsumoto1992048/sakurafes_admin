@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import streamlit as st
 from supabase import create_client
 
@@ -6,13 +8,11 @@ SUPABASE_URL = "https://axhpfaupxcdpjxokmtxl.supabase.co"
 SUPABASE_KEY = "sb_publishable_aMFDA6pKPiWKW55zjtW-_A_tg8isXjj"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+JICHIKAI_LIST_PATH = Path(__file__).parent / "jichikai_list.txt"
 JICHIKAI_LIST = [
-    "〇〇自治会",
-    "△△自治会",
-    "□□自治会",
-    "◇◇自治会",
-    "★★自治会",
-    "☆☆自治会",
+    line.strip()
+    for line in JICHIKAI_LIST_PATH.read_text(encoding="utf-8").splitlines()
+    if line.strip()
 ]
 
 
@@ -78,6 +78,23 @@ div[data-testid="stVerticalBlock"][style*="border"] {
     transform: translateY(-2px);
     color: white;
 }
+
+.ticket-number-display {
+    text-align: center;
+    margin: 0.5rem 0 1rem;
+}
+.ticket-number-display .label {
+    font-size: 1rem;
+    color: #a85a72;
+    font-weight: 700;
+}
+.ticket-number-display .number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #e8779a;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+}
 </style>
 
 <div class="sakura-header">
@@ -113,7 +130,12 @@ draw_status = supabase.table("draw_status").select("*").eq("is_published", True)
 if existing.data:
     record = existing.data[0]
     with st.container(border=True):
-        st.success(f"登録済み：**{ticket_number}**")
+        st.markdown(f"""
+        <div class="ticket-number-display">
+            <div class="label">登録済み</div>
+            <div class="number">{ticket_number}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         if st.button("🔄 最新の結果を確認する", use_container_width=True):
             st.rerun()
@@ -140,7 +162,12 @@ if existing.data:
 else:
     with st.container(border=True):
         st.header("📝 抽選登録")
-        st.write(f"券番号：**{ticket_number}**")
+        st.markdown(f"""
+        <div class="ticket-number-display">
+            <div class="label">券番号</div>
+            <div class="number">{ticket_number}</div>
+        </div>
+        """, unsafe_allow_html=True)
         st.write(f"券種：**{get_ticket_type_label(ticket_type)}**")
 
         jichikai = None
