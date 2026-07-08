@@ -95,6 +95,30 @@ div[data-testid="stVerticalBlock"][style*="border"] {
     letter-spacing: 0.05em;
     line-height: 1.2;
 }
+
+[data-testid="stWidgetLabel"] p {
+    font-weight: 700;
+    color: #a85a72;
+}
+div[data-baseweb="select"] > div {
+    border-radius: 14px !important;
+    border: 2px solid #ffb6c9 !important;
+    background-color: #fff9fb !important;
+}
+div[data-baseweb="select"] > div:hover {
+    border-color: #e8779a !important;
+}
+ul[data-baseweb="menu"] {
+    border-radius: 14px !important;
+    border: 1px solid #ffd6e6 !important;
+}
+li[aria-selected="true"] {
+    background-color: #ffe4ee !important;
+    color: #e8779a !important;
+}
+li[role="option"]:hover {
+    background-color: #fff0f4 !important;
+}
 </style>
 
 <div class="sakura-header">
