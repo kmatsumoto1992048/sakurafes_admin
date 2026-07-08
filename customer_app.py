@@ -115,6 +115,9 @@ if existing.data:
     with st.container(border=True):
         st.success(f"登録済み：**{ticket_number}**")
 
+        if st.button("🔄 最新の結果を確認する", use_container_width=True):
+            st.rerun()
+
         if not draw_status.data:
             st.info("⏳ まだ抽選結果が発表されていません。しばらくお待ちください。")
         else:
