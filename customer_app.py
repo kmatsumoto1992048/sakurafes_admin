@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 from pathlib import Path
 
 import streamlit as st
@@ -7,6 +9,16 @@ from supabase import create_client
 SUPABASE_URL = "https://axhpfaupxcdpjxokmtxl.supabase.co"
 SUPABASE_KEY = "sb_publishable_aMFDA6pKPiWKW55zjtW-_A_tg8isXjj"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+HMAC_SECRET_KEY = st.secrets["HMAC_SECRET_KEY"]
+
+
+def sign(ticket_number: str) -> str:
+    return hmac.new(HMAC_SECRET_KEY.encode(), ticket_number.encode(), hashlib.sha256).hexdigest()[:16]
+
+
+def is_valid_signature(ticket_number: str, sig: str) -> bool:
+    return bool(sig) and hmac.compare_digest(sign(ticket_number), sig)
 
 JICHIKAI_LIST_PATH = Path(__file__).parent / "jichikai_list.txt"
 JICHIKAI_LIST = [
@@ -126,11 +138,15 @@ li[role="option"]:hover {
 </div>
 """, unsafe_allow_html=True)
 
-# URLパラメータから券番号を取得
+# URLパラメータから券番号・署名を取得
 params = st.query_params
 ticket_number = params.get("ticket", [""])
 if isinstance(ticket_number, list):
     ticket_number = ticket_number[0] if ticket_number else ""
+
+sig = params.get("sig", [""])
+if isinstance(sig, list):
+    sig = sig[0] if sig else ""
 
 ticket_type = ticket_number[0].upper() if ticket_number else ""
 
@@ -140,6 +156,10 @@ if not ticket_number:
 
 if not is_valid_ticket_type(ticket_type):
     st.error("無効な券番号です。QRコードを確認してください。")
+    st.stop()
+
+if not is_valid_signature(ticket_number, sig):
+    st.error("QRコードの検証に失敗しました。正しいQRコードから読み取ってください。")
     st.stop()
 
 # 登録済みかチェック
